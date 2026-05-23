@@ -22,56 +22,94 @@ The Boolean model in Information Retrieval (IR) is a fundamental model used for 
     <p>c) For each term in the query, it retrieves documents containing that term and performs Boolean operations (AND, OR, NOT) based on the query's structure.
 
 ### Program:
+```python
+import numpy as np
+import pandas as pd
+class BooleanRetrieval:
+      def __init__(self):
+          self.index = {}
+          self.documents_matrix = None
 
-    import numpy as np
-    import pandas as pd
-    class BooleanRetrieval:
-        def __init__(self):
-            self.index = {}
-            self.documents_matrix = None
+      def index_document(self, doc_id, text):
+          terms = text.lower().split()
+          print("Document -", doc_id, terms)
 
-    def index_document(self, doc_id, text):
-        terms = text.lower().split()
-        print("Document -", doc_id, terms)
+          for term in terms:
+              if term not in self.index:
+                  self.index[term] = set()
+              self.index[term].add(doc_id)
 
-        for term in terms:
-            if term not in self.index:
-                self.index[term] = set()
-            self.index[term].add(doc_id)
+      def create_documents_matrix(self, documents):
+            terms = list(self.index.keys())
+            num_docs = len(documents)
+            num_terms = len(terms)
 
-    def create_documents_matrix(self, documents):
-        terms = list(self.index.keys())
-        num_docs = len(documents)
-        num_terms = len(terms)
+            self.documents_matrix = np.zeros((num_docs, num_terms), dtype=int)
 
-        self.documents_matrix = np.zeros((num_docs, num_terms), dtype=int)
+            for i, (doc_id, text) in enumerate(documents.items()):
+                doc_terms = text.lower().split()
+                for term in doc_terms:
+                    if term in self.index:
+                        term_id = terms.index(term)
+                        self.documents_matrix[i, term_id] = 1
 
-        for i, (doc_id, text) in enumerate(documents.items()):
-            doc_terms = text.lower().split()
-            for term in doc_terms:
-                if term in self.index:
-                    term_id = terms.index(term)
-                    self.documents_matrix[i, term_id] = 1
+      def print_documents_matrix_table(self):
+          df = pd.DataFrame(self.documents_matrix, columns=self.index.keys())
+          print(df)
 
-    def print_documents_matrix_table(self):
-        df = pd.DataFrame(self.documents_matrix, columns=self.index.keys())
-        print(df)
+      def print_all_terms(self):
+          print("All terms in the documents:")
+          print(list(self.index.keys()))
 
-    def print_all_terms(self):
-        print("All terms in the documents:")
-        print(list(self.index.keys()))
+      def boolean_search(self, query):
+          # Normalize query by converting to lowercase and split by logical operators
+          query = query.lower()
+          terms = query.split()
+          
+          # Initialize results with all documents
+          results = set(range(1, len(self.documents_matrix) + 1))
+          
+          # Process AND, OR, and NOT
+          operators = ['and', 'or', 'not']
+          
+          # Handle terms with operators
+          query_terms = []
+          query_operators = []
 
-    def boolean_search(self, query):
-        # TYPE YOUR CODE HERE
+          for term in terms:
+              if term in operators:
+                  query_operators.append(term)
+              else:
+                  query_terms.append(term)
+          
+          # Process query for 'AND' operation
+          if 'and' in query_operators:
+              for term in query_terms:
+                  if term in self.index:
+                      results = results.intersection(self.index[term])
+          
+          # Process query for 'OR' operation
+          elif 'or' in query_operators:
+              for term in query_terms:
+                  if term in self.index:
+                      results = results.union(self.index[term])
+          
+          # Process query for 'NOT' operation
+          elif 'not' in query_operators:
+              for term in query_terms:
+                  if term in self.index:
+                      results = results.difference(self.index[term])
+          
+          return results
 
 if __name__ == "__main__":
     indexer = BooleanRetrieval()
 
     documents = {
-        1: "Python is a programming language",
-        2: "Information retrieval deals with finding information",
-        3: "Boolean models are used in information retrieval"
-    }
+          1: "Python is a programming language",
+          2: "Information retrieval deals with finding information",
+          3: "Boolean models are used in information retrieval"
+      }
 
     for doc_id, text in documents.items():
         indexer.index_document(doc_id, text)
@@ -88,6 +126,10 @@ if __name__ == "__main__":
         print("No results found for the query.")
 
 
+```
 ### Output:
 
+<img width="1641" height="351" alt="image" src="https://github.com/user-attachments/assets/f472b901-6c28-46b2-8c60-5358d98d8809" />
+
 ### Result:
+Implementation of Information Retrieval Using Boolean Model in Python is successfully completed.
